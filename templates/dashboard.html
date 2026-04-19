@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhishDetector | Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Poppins', sans-serif; background: #f0f2f5; }
+
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+      background: linear-gradient(180deg, #1a2a6c, #0d1535);
+      color: white; padding: 2rem 1.5rem; z-index: 100;
+    }
+    .sidebar .brand { font-size: 20px; font-weight: 700; margin-bottom: 2.5rem; display: flex; align-items: center; gap: 10px; }
+    .sidebar .brand span { font-size: 22px; }
+    .nav-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px; border-radius: 10px; color: rgba(255,255,255,0.65);
+      text-decoration: none; font-size: 14px; font-weight: 500;
+      margin-bottom: 6px; transition: all 0.2s;
+    }
+    .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-link .icon { font-size: 18px; width: 22px; text-align: center; }
+    .sidebar-footer { position: absolute; bottom: 2rem; left: 1.5rem; right: 1.5rem; }
+    .user-pill {
+      background: rgba(255,255,255,0.08); border-radius: 12px;
+      padding: 12px; display: flex; align-items: center; gap: 10px;
+    }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #b21f1f; display: flex; align-items: center;
+      justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;
+    }
+    .user-info { flex: 1; overflow: hidden; }
+    .user-info .uname { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-info .urole { font-size: 11px; color: rgba(255,255,255,0.45); }
+
+    .main { margin-left: 240px; padding: 2rem; }
+    .page-title { font-size: 22px; font-weight: 700; color: #1a2a6c; margin-bottom: 0.25rem; }
+    .page-sub { font-size: 13px; color: #888; margin-bottom: 2rem; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
+    .stat-card {
+      background: #fff; border-radius: 16px; padding: 1.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .stat-card .label { font-size: 12px; color: #999; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-card .value { font-size: 36px; font-weight: 700; margin: 0.25rem 0; }
+    .stat-card.total .value { color: #1a2a6c; }
+    .stat-card.safe .value { color: #10b981; }
+    .stat-card.unsafe .value { color: #ef4444; }
+    .stat-card .sub { font-size: 12px; color: #aaa; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 2rem; }
+    .card {
+      background: #fff; border-radius: 16px; padding: 1.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .card h3 { font-size: 15px; font-weight: 600; color: #1a2a6c; margin-bottom: 1.25rem; }
+
+    .scan-btn {
+      display: inline-block; background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+      color: #fff; padding: 12px 30px; border-radius: 50px; text-decoration: none;
+      font-weight: 600; font-size: 14px; margin-top: 1rem;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 8px 12px; color: #999; font-weight: 500; border-bottom: 1px solid #f0f0f0; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f8f8f8; color: #333; }
+    .badge {
+      padding: 3px 10px; border-radius: 50px; font-size: 11px; font-weight: 600;
+    }
+    .badge.safe { background: #d1fae5; color: #065f46; }
+    .badge.unsafe { background: #fee2e2; color: #991b1b; }
+
+    .url-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="brand"><span>🛡</span> PhishDetector</div>
+
+  <a href="/dashboard" class="nav-link active"><span class="icon">📊</span> Dashboard</a>
+  <a href="/" class="nav-link"><span class="icon">🔍</span> Scan URL</a>
+  <a href="/history" class="nav-link"><span class="icon">🕐</span> History</a>
+  <a href="/usecases" class="nav-link"><span class="icon">📋</span> Use Cases</a>
+
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="avatar">{{ user.name[0].upper() }}</div>
+      <div class="user-info">
+        <div class="uname">{{ user.name }}</div>
+        <div class="urole">User</div>
+      </div>
+    </div>
+    <a href="/logout" style="display:block; text-align:center; margin-top:12px; font-size:13px; color:rgba(255,255,255,0.4); text-decoration:none;">Logout →</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-title">Welcome back, {{ user.name.split()[0] }} 👋</div>
+  <div class="page-sub">Here's your phishing detection summary</div>
+
+  <div class="stat-grid">
+    <div class="stat-card total">
+      <div class="label">Total Scans</div>
+      <div class="value">{{ stats.total }}</div>
+      <div class="sub">All time</div>
+    </div>
+    <div class="stat-card safe">
+      <div class="label">Safe URLs</div>
+      <div class="value">{{ stats.safe }}</div>
+      <div class="sub">Verified clean</div>
+    </div>
+    <div class="stat-card unsafe">
+      <div class="label">Threats Found</div>
+      <div class="value">{{ stats.unsafe }}</div>
+      <div class="sub">Phishing detected</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Scan Distribution</h3>
+      {% if stats.total > 0 %}
+        <canvas id="pieChart" height="200"></canvas>
+      {% else %}
+        <p style="color:#aaa; font-size:13px; text-align:center; padding: 2rem 0;">No scans yet. Start scanning!</p>
+        <div style="text-align:center;">
+          <a href="/" class="scan-btn">Scan a URL</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h3>Recent Scans</h3>
+      {% if stats.recent %}
+      <table>
+        <thead>
+          <tr><th>URL</th><th>Result</th><th>Score</th></tr>
+        </thead>
+        <tbody>
+          {% for scan in stats.recent %}
+          <tr>
+            <td class="url-cell" title="{{ scan.url }}">{{ scan.url }}</td>
+            <td><span class="badge {{ 'safe' if scan.is_safe else 'unsafe' }}">{{ scan.result }}</span></td>
+            <td>{{ scan.risk_score }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <p style="color:#aaa; font-size:13px;">No scans yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  {% if stats.total > 0 %}
+  const ctx = document.getElementById('pieChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Safe', 'Unsafe'],
+      datasets: [{
+        data: [{{ stats.safe }}, {{ stats.unsafe }}],
+        backgroundColor: ['#10b981', '#ef4444'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } },
+      cutout: '65%'
+    }
+  });
+  {% endif %}
+</script>
+</body>
+</html>

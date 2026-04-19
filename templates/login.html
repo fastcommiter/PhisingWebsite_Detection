@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>PhishDetector | Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Poppins', sans-serif; }
+
+    .page-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0a0f2e;
+      position: relative;
+      overflow: hidden;
+      padding: 2rem 1rem;
+    }
+
+    canvas#bg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    .card {
+      position: relative;
+      z-index: 10;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 420px;
+      color: #fff;
+    }
+
+    .logo-area { text-align: center; margin-bottom: 1.5rem; }
+    .logo-area .shield {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+      font-size: 24px;
+    }
+    .logo-area h2 { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: 1px; }
+    .logo-area p { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+
+    .tabs {
+      display: flex;
+      background: rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 1.5rem;
+    }
+    .tab-btn {
+      flex: 1; padding: 8px; border: none; border-radius: 7px;
+      background: transparent; color: rgba(255,255,255,0.5);
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: all 0.25s; font-family: inherit;
+    }
+    .tab-btn.active { background: #1a2a6c; color: #fff; }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      font-size: 12px; color: rgba(255,255,255,0.55);
+      display: block; margin-bottom: 6px; font-weight: 500;
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .form-group input {
+      width: 100%; padding: 11px 14px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px; color: #fff; font-size: 14px;
+      outline: none; transition: border 0.2s; font-family: inherit;
+    }
+    .form-group input::placeholder { color: rgba(255,255,255,0.25); }
+    .form-group input:focus { border-color: rgba(26,42,108,0.8); }
+
+    .btn-main {
+      width: 100%; padding: 12px;
+      background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+      border: none; border-radius: 10px; color: #fff;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      margin-top: 0.5rem; transition: opacity 0.2s, transform 0.1s;
+      font-family: inherit; letter-spacing: 0.5px;
+    }
+    .btn-main:hover { opacity: 0.9; transform: scale(1.01); }
+    .btn-main:active { transform: scale(0.99); }
+
+    .msg {
+      font-size: 13px; padding: 10px 14px;
+      border-radius: 8px; margin-top: 1rem; display: none;
+    }
+    .msg.success { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+    .msg.error { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+
+    .footer-note { text-align: center; font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 1.25rem; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <canvas id="bg"></canvas>
+
+  <div class="card">
+    <div class="logo-area">
+      <div class="shield">🛡</div>
+      <h2>PhishDetector</h2>
+      <p>Secure authentication portal</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn" onclick="switchTab('register')">Create Account</button>
+    </div>
+
+    <div id="login-panel" class="panel active">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="l-email" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="l-pass" placeholder="Enter password">
+      </div>
+      <button class="btn-main" onclick="doLogin()">Login →</button>
+      <div class="msg" id="login-msg"></div>
+    </div>
+
+    <div id="register-panel" class="panel">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="r-name" placeholder="Kunal Latwal">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="r-email" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="r-pass" placeholder="Min 6 characters">
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" id="r-pass2" placeholder="Repeat password">
+      </div>
+      <button class="btn-main" onclick="doRegister()">Create Account →</button>
+      <div class="msg" id="register-msg"></div>
+    </div>
+
+    <div class="footer-note">All data stored locally on your device</div>
+  </div>
+</div>
+
+<!-- Hidden form to send session to Flask -->
+<form id="flask-form" action="/login/verify" method="POST" style="display:none;">
+  <input type="hidden" id="hidden-email" name="email">
+  <input type="hidden" id="hidden-name" name="name">
+</form>
+
+<script>
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) =>
+      b.classList.toggle('active', (tab==='login' && i===0) || (tab==='register' && i===1))
+    );
+    document.getElementById('login-panel').classList.toggle('active', tab==='login');
+    document.getElementById('register-panel').classList.toggle('active', tab==='register');
+  }
+
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'msg ' + type;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 3500);
+  }
+
+  function doRegister() {
+    const name  = document.getElementById('r-name').value.trim();
+    const email = document.getElementById('r-email').value.trim();
+    const pass  = document.getElementById('r-pass').value;
+    const pass2 = document.getElementById('r-pass2').value;
+
+    if (!name || !email || !pass || !pass2) return showMsg('register-msg', 'All fields required', 'error');
+    if (pass.length < 6) return showMsg('register-msg', 'Password min 6 characters', 'error');
+    if (pass !== pass2) return showMsg('register-msg', 'Passwords do not match', 'error');
+
+    const users = JSON.parse(localStorage.getItem('pd_users') || '{}');
+    if (users[email]) return showMsg('register-msg', 'Account already exists. Please login.', 'error');
+
+    users[email] = { name, pass };
+    localStorage.setItem('pd_users', JSON.stringify(users));
+    showMsg('register-msg', '✓ Account created! You can now login.', 'success');
+    setTimeout(() => switchTab('login'), 1800);
+  }
+
+  function doLogin() {
+    const email = document.getElementById('l-email').value.trim();
+    const pass  = document.getElementById('l-pass').value;
+
+    if (!email || !pass) return showMsg('login-msg', 'Enter email and password', 'error');
+
+    const users = JSON.parse(localStorage.getItem('pd_users') || '{}');
+    if (!users[email]) return showMsg('login-msg', 'No account found. Please register.', 'error');
+    if (users[email].pass !== pass) return showMsg('login-msg', 'Incorrect password', 'error');
+
+    document.getElementById('hidden-email').value = email;
+    document.getElementById('hidden-name').value = users[email].name;
+    document.getElementById('flask-form').submit();
+  }
+
+  // Background animation
+  const canvas = document.getElementById('bg');
+  const ctx = canvas.getContext('2d');
+  let nodes = [], W, H;
+
+  function resize() {
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+
+  function init() {
+    resize();
+    nodes = Array.from({length: 55}, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      r: Math.random() * 2 + 1,
+      pulse: Math.random() * Math.PI * 2
+    }));
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    nodes.forEach(n => {
+      n.x += n.vx; n.y += n.vy; n.pulse += 0.02;
+      if (n.x < 0 || n.x > W) n.vx *= -1;
+      if (n.y < 0 || n.y > H) n.vy *= -1;
+    });
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(100,130,255,${(1 - dist/120) * 0.25})`;
+          ctx.lineWidth = 0.6;
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n => {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(100,160,255,${(0.7 + 0.3 * Math.sin(n.pulse)) * 0.8})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  init();
+  draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhishDetector | Threat Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Poppins', sans-serif; background: #f0f2f5; }
+
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+      background: linear-gradient(180deg, #1a2a6c, #0d1535);
+      color: white; padding: 2rem 1.5rem; z-index: 100;
+    }
+    .sidebar .brand {
+      font-size: 20px; font-weight: 700; margin-bottom: 2.5rem;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nav-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px; border-radius: 10px;
+      color: rgba(255,255,255,0.65); text-decoration: none;
+      font-size: 14px; font-weight: 500; margin-bottom: 6px; transition: all 0.2s;
+    }
+    .nav-link:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-link .icon { font-size: 18px; width: 22px; text-align: center; }
+    .sidebar-footer { position: absolute; bottom: 2rem; left: 1.5rem; right: 1.5rem; }
+    .user-pill {
+      background: rgba(255,255,255,0.08); border-radius: 12px;
+      padding: 12px; display: flex; align-items: center; gap: 10px;
+    }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: #b21f1f;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; flex-shrink: 0;
+    }
+    .user-info .uname { font-size: 13px; font-weight: 600; }
+    .user-info .urole { font-size: 11px; color: rgba(255,255,255,0.45); }
+
+    .main { margin-left: 240px; padding: 2rem; }
+
+    .verdict-banner {
+      border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 1.5rem;
+    }
+    .verdict-banner.safe { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+    .verdict-banner.unsafe { background: linear-gradient(135deg, #fee2e2, #fecaca); }
+    .verdict-icon { font-size: 48px; }
+    .verdict-title { font-size: 24px; font-weight: 700; }
+    .verdict-banner.safe .verdict-title { color: #065f46; }
+    .verdict-banner.unsafe .verdict-title { color: #991b1b; }
+    .verdict-url {
+      font-size: 13px; color: #555; margin-top: 4px;
+      word-break: break-all; max-width: 600px;
+    }
+
+    .risk-section {
+      background: #fff; border-radius: 16px; padding: 1.5rem;
+      margin-bottom: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .risk-section h3 { font-size: 15px; font-weight: 600; color: #1a2a6c; margin-bottom: 1rem; }
+
+    .score-wrap { display: flex; align-items: center; gap: 1.5rem; }
+    .score-circle {
+      width: 90px; height: 90px; border-radius: 50%; flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-weight: 700;
+    }
+    .score-circle.safe { background: #d1fae5; color: #065f46; }
+    .score-circle.unsafe { background: #fee2e2; color: #991b1b; }
+    .score-circle .num { font-size: 28px; line-height: 1; }
+    .score-circle .lbl { font-size: 11px; }
+
+    .progress-wrap { flex: 1; }
+    .progress-label {
+      display: flex; justify-content: space-between;
+      font-size: 13px; margin-bottom: 6px; color: #555;
+    }
+    .progress-bar { height: 10px; background: #f0f0f0; border-radius: 5px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 5px; }
+    .progress-fill.safe { background: #10b981; }
+    .progress-fill.unsafe { background: #ef4444; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
+    .card {
+      background: #fff; border-radius: 16px; padding: 1.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .card h3 { font-size: 15px; font-weight: 600; margin-bottom: 1rem; }
+    .card.threats h3 { color: #991b1b; }
+    .card.safe-card h3 { color: #065f46; }
+
+    .feature-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0; border-bottom: 1px solid #f8f8f8; font-size: 13px;
+    }
+    .feature-item:last-child { border-bottom: none; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot.red { background: #ef4444; }
+    .dot.green { background: #10b981; }
+
+    .action-bar { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn {
+      padding: 11px 24px; border-radius: 50px; font-size: 14px;
+      font-weight: 600; text-decoration: none; display: inline-block;
+    }
+    .btn-primary { background: linear-gradient(135deg, #1a2a6c, #b21f1f); color: #fff; }
+    .btn-outline { border: 2px solid #1a2a6c; color: #1a2a6c; }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="brand"><span>🛡</span> PhishDetector</div>
+  <a href="/dashboard" class="nav-link"><span class="icon">📊</span> Dashboard</a>
+  <a href="/" class="nav-link"><span class="icon">🔍</span> Scan URL</a>
+  <a href="/history" class="nav-link"><span class="icon">🕐</span> History</a>
+  <a href="/usecases" class="nav-link"><span class="icon">📋</span> Use Cases</a>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="avatar">{{ user.name[0].upper() }}</div>
+      <div class="user-info">
+        <div class="uname">{{ user.name }}</div>
+        <div class="urole">Member</div>
+      </div>
+    </div>
+    <a href="/logout" style="display:block; text-align:center; margin-top:12px; font-size:13px; color:rgba(255,255,255,0.4); text-decoration:none;">Logout →</a>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="verdict-banner {{ 'safe' if is_safe else 'unsafe' }}">
+    <div class="verdict-icon">{{ '✅' if is_safe else '🚨' }}</div>
+    <div>
+      <div class="verdict-title">{{ 'This URL appears Safe' if is_safe else 'Phishing Threat Detected!' }}</div>
+      <div class="verdict-url">{{ url }}</div>
+    </div>
+  </div>
+
+  <div class="risk-section">
+    <h3>Risk Score</h3>
+    <div class="score-wrap">
+      <div class="score-circle {{ 'safe' if is_safe else 'unsafe' }}">
+        <div class="num">{{ risk_score }}</div>
+        <div class="lbl">/ 100</div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Risk Level</span>
+          <span>{{ risk_level }}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill {{ 'safe' if is_safe else 'unsafe' }}" style="width: {{ risk_score }}%"></div>
+        </div>
+        <p style="font-size:12px; color:#aaa; margin-top:8px;">
+          {{ 'No major threats detected. Safe to proceed with caution.' if is_safe else 'Multiple phishing indicators found. Avoid visiting this URL.' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card threats">
+      <h3>⚠ Suspicious Indicators ({{ threats|length }})</h3>
+      {% if threats %}
+        {% for t in threats %}
+        <div class="feature-item">
+          <div class="dot red"></div>
+          <span>{{ t }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:#aaa; font-size:13px;">No suspicious indicators found.</p>
+      {% endif %}
+    </div>
+
+    <div class="card safe-card">
+      <h3>✓ Safe Indicators ({{ safe_features|length }})</h3>
+      {% if safe_features %}
+        {% for s in safe_features %}
+        <div class="feature-item">
+          <div class="dot green"></div>
+          <span>{{ s }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:#aaa; font-size:13px;">No safe indicators found.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <a href="/" class="btn btn-primary">Scan Another URL</a>
+    <a href="/history" class="btn btn-outline">View History</a>
+  </div>
+
+</div>
+</body>
+</html>
