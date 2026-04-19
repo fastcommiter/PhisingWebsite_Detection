@@ -1,75 +1,41 @@
-🛡️ Phishing Website Detection System
+# 🛡️ Phishing Website Detection System
+**A Hybrid Machine Learning & Heuristic-Based Security Engine**
 
-A hybrid Machine Learning & Rule-Based URL Analysis Engine.
+[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-2.0+-000000?style=flat&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![Machine Learning](https://img.shields.io/badge/ML-Voting_Ensemble-orange?style=flat)](https://scikit-learn.org/)
 
-This project is a sophisticated cybersecurity tool designed to identify malicious URLs in real-time. Unlike basic binary classifiers, this system provides a granular risk score (0-100) using a combination of high-accuracy ML models and heuristic security layers.
+## 📝 Overview
+Phishing attacks are one of the most common cybersecurity threats where attackers create fake URLs to steal credentials. This project addresses this problem by using a **Voting Ensemble Machine Learning model** combined with rule-based layers to detect malicious websites in real-time.
 
-🚀 Key Features
+---
 
-30+ Feature Extraction: Real-time analysis of URL anatomy (HTTPS status, Domain Age, Rank, URL length, etc.).
+## 🚀 Key Features
+- **Hybrid ML Engine:** Uses a **Voting Ensemble** (Gradient Boosting + Random Forest + Extra Trees) for **96.8% accuracy**.
+- **30-Feature Extraction:** Real-time analysis of URL anatomy (Domain Age, SSL status, Anchor links %, etc.).
+- **Typosquatting Detection:** Implemented **Levenshtein Distance** to identify domains imitating brands (e.g., `faceboobs.com`).
+- **Granular Risk Scoring:** Provides a **0-100 risk score** rather than a simple binary safe/unsafe label.
+- **User Dashboard:** Full-stack Flask application with an integrated **SQLite database** to store scan history.
 
-Hybrid ML Engine: Uses a Voting Ensemble (Gradient Boosting + Random Forest + Extra Trees) for a generalized accuracy of 96.8%.
+---
 
-Advanced Security Layers:
+## 📊 Model Performance
+I compared 6 models on a dataset of **11,054 URLs** to find the best generalized accuracy:
 
-Typosquatting Detection: Uses Levenshtein Distance to identify domains imitating brands (e.g., faceboobs.com vs facebook.com).
+| Model | Accuracy |
+| :--- | :--- |
+| **Voting Ensemble (Proposed)** | **96.80%** |
+| Random Forest | 95.21% |
+| Gradient Boosting | 94.85% |
+| Extra Trees | 94.10% |
+| Decision Tree | 91.40% |
+| Logistic Regression | 82.35% |
 
-Keyword Analysis: Heuristics to catch suspicious terms like get-free-money or login-update.
+---
 
-User Dashboard: Built with Flask and SQLite to track scan history and provide a detailed risk report.
+## 📁 Installation & Setup
 
-🛠️ Tech Stack
-
-Language: Python
-
-ML Libraries: Scikit-Learn, Pandas, NumPy
-
-Backend: Flask (Python)
-
-Database: SQLite
-
-Frontend: HTML5, CSS3 (Responsive UI), JavaScript
-
-📊 Model Performance
-
-I compared 6 different models to find the most reliable predictor:
-
-ModelAccuracyVoting Ensemble96.8%Random Forest95.2%Gradient Boosting94.8%Logistic Regression82.4%
-
-⚙️ How it Works
-
-Input: User submits a URL via the Flask interface.
-
-Extraction: System fetches WHOIS data and parses HTML/URL strings to extract 30 key features.
-
-Prediction: The pre-trained Voting Ensemble model processes the features.
-
-Heuristic Check: Simultaneously, the system runs a Levenshtein check for brand impersonation.
-
-Output: A risk score and an "Is Phishing?" verdict are displayed.
-
-📁 Installation & Setup
-
-Clone the repo:
-
-Bash
-
-
-
-git clone https://github.com/KunalLatwal/phishing-detection.git
-
-Install dependencies:
-
-Bash
-
-
-
-pip install -r requirements.txt
-
-Run the app:
-
-Bash
-
-
-
-python app.py
+### 1. Clone the repository
+```bash
+git clone [https://github.com/KunalLatwal/phishing-detection.git](https://github.com/KunalLatwal/phishing-detection.git)
+cd phishing-detection
